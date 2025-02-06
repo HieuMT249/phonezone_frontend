@@ -1,6 +1,15 @@
-function DefaultLayout() {
+import { useEffect, useState } from "react";
+import Footer from "../Footer";
+import Header from "../Header";
+
+function DefaultLayout({children}) {
     return ( 
-        <h1>DefaultLayout</h1>
+        <div>
+            <Header/>
+            <div id="categories">{children}</div>
+            <div id="aboutus"><Footer/></div>
+        </div>
+        
      );
 }
 
