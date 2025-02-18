@@ -1,7 +1,7 @@
 function Branch({ image, alt, uri }) {
     return (
         <>
-            <a href={uri} className="relative mt-12 flex justify-center items-center hover:scale-125">
+            <a href={uri} className="relative mt-6 flex justify-center items-center hover:scale-125 transition-transform duration-200 ease-in-out">
                 <div className="absolute w-32 h-32 rounded-full bg-radial"></div>
                 <img
                     src={image}

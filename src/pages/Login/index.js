@@ -29,8 +29,14 @@ function Login() {
 
             // lưu trữ token
             localStorage.setItem("token", response.data);
+            const previousUrl = sessionStorage.getItem('previousUrl');
 
-            navigate("/");
+            if (previousUrl) {
+                navigate(previousUrl);
+            } else {
+                navigate('/');
+            }
+            
         } catch (err) {
             if (err.response && err.response.data) {
                 const errorMessage = err.response.data;
@@ -106,10 +112,10 @@ function Login() {
 
                 {/* Social Login Buttons */}
                 <div className="flex justify-between w-full gap-4">
-                    <button className="flex-1 flex items-center justify-center bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition-all">
+                    <button onClick={(e)=>{e.preventDefault();console.log("Đăng nhập bằng FB");}} className="flex-1 flex items-center justify-center bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 transition-all">
                         <FaFacebook className="mr-2 text-lg" /> Facebook
                     </button>
-                    <button className="flex-1 flex items-center justify-center border border-primary text-black py-2 rounded-lg font-medium hover:bg-second transition-all">
+                    <button onClick={(e)=>{e.preventDefault();console.log("Đăng nhập bằng FB");}} className="flex-1 flex items-center justify-center border border-primary text-black py-2 rounded-lg font-medium hover:bg-second transition-all">
                         <FcGoogle className="mr-2 text-lg" /> Google
                     </button>
                 </div>

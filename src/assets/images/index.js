@@ -12,7 +12,9 @@ const images = {
     realme: require('./realme.png'),
     samsung: require('./samsung.png'),
     vivo: require('./vivo.png'),
-    xiaomi: require('./xiaomi.png'),
+    all: require('./all.png'),
+    empty: require('./empty_cart.png'),
+    payment_success: require('./payment-success.png'),
 }
 
 export default images;

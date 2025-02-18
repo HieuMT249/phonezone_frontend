@@ -21,6 +21,7 @@ function Register() {
 
     const navigate = useNavigate();
 
+    const usernameRegex = /^[a-zA-Z0-9]+$/;
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     
     const handleRegister = async (e) => {
@@ -31,6 +32,16 @@ function Register() {
                 severity: "error",
                 summary: "Lỗi",
                 detail: "Vui lòng điền đầy đủ thông tin",
+                life: 2000,
+            });
+            return;
+        }
+
+        if (!usernameRegex.test(name)) {
+            toast.current.show({
+                severity: "error",
+                summary: "Lỗi",
+                detail: "Username chỉ được chứa chữ cái không dấu và số, không có khoảng trắng.",
                 life: 2000,
             });
             return;
@@ -123,7 +134,7 @@ function Register() {
                     <HiOutlineUser className="text-gray-400 mr-3 text-xl" />
                     <input
                         type="text"
-                        placeholder="Name"
+                        placeholder="Username"
                         className="outline-none flex-1 text-gray-700 placeholder-gray-400"
                         onChange={(e) => setName(e.target.value)}
                     />
