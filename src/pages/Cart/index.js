@@ -41,10 +41,8 @@ function Cart() {
     const [userData, setUserData] = useState('');
     const [coupon, setCoupon] = useState('');
     const [errors, setErrors] = useState({});
-    const [selectedCoupon, setSelectedCoupon] = useState(null);
     const [timer, setTimer] = useState(5);
     const [selectedPayment, setSelectedPayment] = useState(null);
-    const [orderSaved, setOrderSaved] = useState(false);
 
 
     const toast = useRef(null);
@@ -223,7 +221,6 @@ function Cart() {
             });
         }
     };
-    
 
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
@@ -235,27 +232,25 @@ function Cart() {
                 totalAmount: sessionStorage.getItem('totalAmount'),
                 discountAmount: JSON.parse(sessionStorage.getItem('coupon')),
                 finalAmount: Intl.NumberFormat('vi-VN').format(queryParams.get('vnp_Amount')/100) + 'đ',
-                status: queryParams.get('vnp_OrderInfo'),
+                status: 'warning',
                 paymentMethod: "VNPay",
                 color: JSON.parse(sessionStorage.getItem('color'))
             };
 
             saveOrder(orderData);
             localStorage.setItem('orderSaved', 'true');
-
-            const userId = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
-            axios.delete(`https://localhost:7274/api/v1/CartItems/${userId}`);
-
-            setCart([]);
-            sessionStorage.removeItem('cart');
-
             setCurrentStep(3);
-        }
-    }, [location, coupon, user]);
 
-    useEffect(() => {
-        localStorage.removeItem('orderSaved');  
-    }, []);
+            axios.delete(`https://localhost:7274/api/v1/CartItems/user/${JSON.parse(sessionStorage.getItem('user'))}`)
+            .then((response) => {
+                console.log('Cart cleared successfully:', response);
+            })
+            .catch((error) => {
+                console.error('Error clearing cart:', error);
+            });
+
+        }
+    }, [location]);
 
     const nextStep = () => {
         if (currentStep === 2 && !selectedPayment) {
@@ -429,7 +424,6 @@ function Cart() {
         return totalprice;
     }
 
-
     useEffect(() => {
         if (currentStep === 3 && timer > 0) {
             sessionStorage.removeItem('user');
@@ -445,9 +439,10 @@ function Cart() {
         }
 
         if (timer === 0) {
+            localStorage.removeItem('orderSaved');
             navigate("/");
         }
-    }, [cart, currentStep, timer, navigate, coupon]);
+    }, [currentStep, timer, navigate]);
   
     const handlePayment = async () => {
         try {
@@ -479,12 +474,11 @@ function Cart() {
         }
     };
     
-
     return (
         <>
             <Toast ref={toast} />
             {
-            (!cart || cart.length === 0) ? 
+            ((!cart || cart.length === 0) && currentStep !== 3) ? 
                 (
                     <div className='min-h-screen flex flex-col items-center font-semibold'>
                         <img className='w-96 mb-6' src={images.empty} alt="cart-empty"/>

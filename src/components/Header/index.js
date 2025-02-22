@@ -45,7 +45,7 @@ function Header({ toggleCartPopup }) {
               icon: 'pi pi-sign-out',
               command: () => {
                   localStorage.removeItem("token");
-                  navigate("/")
+                  window.location.reload();
               }
           }
         ],

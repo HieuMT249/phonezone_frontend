@@ -24,6 +24,17 @@ function ProductDetail() {
     const location = useLocation();
     const toast = useRef(null);
 
+    const specs = [
+        { label: 'Kích thước màn hình', value: productDetail.screen },
+        { label: 'Công nghệ màn hình', value: productDetail.screenTechnology },
+        { label: 'Camera sau', value: productDetail.rearCamera },
+        { label: 'Camera trước', value: productDetail.frontCamera },
+        { label: 'Chipset', value: productDetail.chipset },
+        { label: 'Công nghệ NFC', value: productDetail.nfc ? "Có" : "Không" },
+        { label: 'Dung lượng RAM', value: productDetail.ram },
+        { label: 'Bộ nhớ trong', value: productDetail.internalMemory },
+        { label: 'Pin', value: productDetail.batteryCapacity },
+    ];
 
     const parseJwt = (token) => {
         try {
@@ -196,6 +207,33 @@ function ProductDetail() {
         }
     }
 
+    const handleBuyNow = async (userId, productId) => {
+        if(!user){
+            setIsCartVisible(!isCartVisible);
+        }else{
+            const data = {
+                userId: userId,
+                productId: productId
+            };
+
+            try {
+                await axios.post(`https://localhost:7274/api/v1/Carts/add-cart`,data);
+                const response = await axios.get(`https://localhost:7274/api/v1/Carts/count/${userInfo.id}`);
+                setCartCount(response.data.count);
+                toast.current.show({
+                    severity: "success",
+                    summary: "Thành công",
+                    detail: "Sản phẩm đã được thêm vào giỏ hàng.",
+                    life: 2000,
+                });
+
+                navigate("/cart");
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    }
+
     return (
         <div>
             <Toast ref={toast} />
@@ -233,7 +271,7 @@ function ProductDetail() {
                                 </ul>
                             </div>
                             <div className='flex items-center mt-10'>
-                                <div className='text-center text-white bg-primary hover:opacity-60 px-10 py-4 rounded-xl'>
+                                <div onClick={() => handleBuyNow(userInfo.id, id)} className='text-center text-white bg-primary hover:opacity-60 px-10 py-4 rounded-xl'>
                                     <p className='text-lg font-semibold'>Mua ngay</p>
                                     <p className='text-md font-thin'>(Giao nhanh từ 2 giờ trong nội thành)</p>
                                 </div>
@@ -285,15 +323,31 @@ function ProductDetail() {
                                     ))
                                 }
                             </div>
-                                <div className="absolute bottom-0 -left-[16rem] flex justify-center items-center text-center my-6 w-full mx-auto">
+                                <div className="absolute bottom-0 -left-[10rem] flex justify-center items-center text-center my-6 w-full mx-auto">
                                     {isExpand ? 
                                         <button onClick={toggleExpand} className="flex items-center px-4 p-1 text-lg border border-second hover:border-primary hover:text-primary rounded ">Thu gọn<i className="ml-1"><IoIosArrowUp /></i></button>
                                         :
                                         <button onClick={toggleExpand} className="flex items-center px-4 p-1 text-lg border border-second hover:border-primary hover:text-primary rounded ">Xem thêm<i className="ml-1"><IoIosArrowDown /></i></button>
                                     }
                                 </div>
-                            <div className='border bg-white drop-shadow-xl w-1/3 rounded-xl py-4 px-6 text-2xl font-semibold'>
-                                <p>Thông số kỹ thuật</p>
+                            <div className='border bg-white drop-shadow-xl w-1/3 rounded-xl py-4 px-6 text-2xl max-h-[30rem] overflow-hidden'>
+                                <p className='font-bold text-center mb-4'>Thông số kỹ thuật</p>
+                                <table className="w-full table-auto text-lg border">
+                                    <thead className='border'>
+                                        <tr className='text-center border'>
+                                            <th className="font-semibold border p-2">Thông số</th>
+                                            <th className="font-semibold border p-2">Giá trị</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {specs.map((spec, index) => (
+                                            <tr key={index} className="border">
+                                                <td className="p-2 border">{spec.label}</td>
+                                                <td className="p-2 border">{spec.value}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         </>
                     ) : (

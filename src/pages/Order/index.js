@@ -1,43 +1,94 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Tag } from 'primereact/tag';
 import { DataScroller } from 'primereact/datascroller';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { FloatLabel } from 'primereact/floatlabel';
+import { InputText } from 'primereact/inputtext';
+import { Toast } from 'primereact/toast';
         
 
 function Order() {
     const [selectedStatus, setSelectedStatus] = useState("Tất cả");
     const [showPopUp, setShowPopUp] = useState(false);
     const [cancelReason, setCancelReason] = useState('');
+    const [email, setEmail] = useState('');
+    const [user, setUser] = useState();
+    const [orders, setOrders] = useState('');
+    const [orderId, setOrderId] = useState('');
+    const [errors, setErrors] = useState({
+        email: '',
+        cancelReason: ''
+    });
+    
+    const toast = useRef(null);
+    const navigate = useNavigate();
 
-
-    const orders = [
-        {
-            id: "#19428392121HADHW",
-            status: "success",
-            image: "https://cdn2.cellphones.com.vn/insecure/plain/https://cellphones.com.vn/media/catalog/product/i/p/iphone11-green-select-2019_2_1_2_2_3.png",
-            productName: "Iphone 11 256GB",
-            price: "6.990.000đ"
-        },
-        {
-            id: "#Khdh983094JFJE",
-            status: "danger",
-            image: "https://cdn2.cellphones.com.vn/insecure/plain/https://cellphones.com.vn/media/catalog/product/x/i/xiaomi-13-pro-thumb-xanh-la9.jpg",
-            productName: "Xiaomi 13T Pro 5G 12GB 512GB",
-            price: "10.990.000đ"
-        },
-        {
-            id: "#GJDWJO129984",
-            status: "secondary",
-            image: "https://cdn2.cellphones.com.vn/insecure/plain/https://cellphones.com.vn/media/catalog/product/d/i/dien-thoai-itel-9310-4g_1_.png",
-            productName: "Itel 9310 4G",
-            price: "650.000đ"
+    const parseJwt = (token) => {
+        try {
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const decodedPayload = atob(base64);
+  
+          return JSON.parse(decodedPayload);
+        } catch (e) {
+          return null;
         }
-    ]
+    };
 
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            const decodedToken = parseJwt(token);
+            if (decodedToken) {
+                const expirationTime = decodedToken.exp * 1000;
+                const currentTime = Date.now();
+    
+                if (expirationTime > currentTime) {
+                setUser(decodedToken);
+                } else {
+                localStorage.removeItem("token");
+                navigate("/");
+                }
+            }
+        }
+    }, [navigate]); 
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const response = await axios.get(`https://localhost:7274/api/v1/Orders`);
+                const ordersData = response.data.$values;
+    
+                const updatedOrders = await Promise.all(ordersData.map(async (order) => {
+                    const responseDetails = await axios.get(`https://localhost:7274/api/v1/OrderDetails/Order/${order.id}`);
+                    const orderDetailsData = responseDetails.data.$values;
+                    order.details = orderDetailsData;
+    
+                    const updatedDetails = await Promise.all(orderDetailsData.map(async (orderDetail) => {
+                        const productResponse = await axios.get(`https://localhost:7274/api/v1/Products/${orderDetail.productId}`);
+                        orderDetail.product = productResponse.data;
+                        return orderDetail;
+                    }));
+    
+                    order.details = updatedDetails;
+                    return order;
+                }));
+    
+                setOrders(updatedOrders);
+    
+            } catch (error) {
+                console.log("Error fetching order", error);
+            }
+        };
+        fetchOrders();
+    }, []);
+    
     const tags = {
         success : "Giao hàng thành công",
         secondary : "Đã xác nhận",
         info: "Đang giao hàng",
-        danger: "Đã Hủy",
+        danger: "Đã hủy",
         warning: "Chờ xác nhận"
     }
     const handleButtonClick = (status) => {
@@ -50,38 +101,93 @@ function Order() {
             : "hover:bg-second border-second";
     };
 
-    const itemTemplate = (order) => {
+    const itemTemplate =  (order) => {
+        var image="";
+        var productName="";
+        var quantity="";
+        order.details?.map(item => {
+            productName = item.product?.productName || "NoName"
+            image = item.product?.image || "No Image"
+            quantity = item?.quantity || "0"
+        });
         return (
             <div className='rounded-xl bg-white drop-shadow-xl p-6 mt-6'>
                 <div className='w-full flex justify-between border-2 border-transparent border-b-gray-300 h-12'>
-                    <span className='text-xl font-bold mr-6'>Đơn hàng: <span className='text-lg font-normal'>{order.id}</span></span>
+                    <span className='text-xl font-bold mr-6'>Đơn hàng: #<span className='text-lg font-normal'>{order.id}</span></span>
                     <Tag className='mb-2' severity={order.status}>{tags[order.status]}</Tag>
                 </div>
                 <div className="flex mt-8 px-10 p-6">
-                    <img src={order.image} alt={order.productName} className="w-20 h-20 object-cover mr-4" />
-                    <div className='flex justify-between w-full'>
-                        <p className="text-xl ml-10 font-bold">{order.productName}</p>
-                        <p className="font-bold">Tổng tiền: <span className='font-normal'>{order.price}</span></p>
+                    <img src={image} alt={productName} className="w-20 h-20 object-cover mr-4" />
+                    <div className='flex justify-between items-end w-full'>
+                        <p className="text-xl ml-10 font-bold">
+                            <span>{productName}</span>
+                            <div className='text-lg mt-2'>Số lượng:<span className='ml-2 font-normal'>{quantity}</span></div>
+                        </p>
+                        <p className="font-bold">Tổng tiền: <span className='ml-2 font-normal'>{order.totalAmount}</span></p>
                     </div>
                 </div>
                 {
                     order.status === "secondary" &&
                         <div className='text-end'>
-                            <button onClick={handleCancelOrder} className='border py-4 px-6 rounded-xl border-red-600 text-red-600 hover:bg-red-600 hover:text-white'> Hủy đơn </button>
+                            <button onClick={handleCancelOrder(order.id)} className='border py-4 px-6 rounded-xl border-red-600 text-red-600 hover:bg-red-600 hover:text-white'> Hủy đơn </button>
                         </div>
                 }
             </div>
         )
     }
 
-    const handleCancelOrder = () => {
+    const handleCancelOrder = (orderId) => {
+        setOrderId(orderId);
         setShowPopUp(true);
     };
     
-    const handleCancelSubmit = () => {
-        setShowPopUp(false);
-        setCancelReason('');
+    const handleCancelSubmit = async () => {
+        let formIsValid = true;
+        let newErrors = { email: '', cancelReason: '' };
+
+        if (!email.trim()) {
+            formIsValid = false;
+            newErrors.email = 'Email là bắt buộc';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            formIsValid = false;
+            newErrors.email = 'Email không hợp lệ';
+        }
+
+        if (!cancelReason.trim()) {
+            formIsValid = false;
+            newErrors.cancelReason = 'Lý do hủy là bắt buộc';
+        }
+
+        setErrors(newErrors);
+
+        if(formIsValid){
+            try {
+                const response = await axios.get(`https://localhost:7274/api/v1/Orders/${orderId}`);
+
+                const updatedOrder = {
+                    ...response.data,
+                    status: 'danger'
+                };
+
+                setShowPopUp(false);
+                await axios.put(`https://localhost:7274/api/v1/Orders/${orderId}`, updatedOrder);
+
+                setCancelReason('');
+                setEmail('');
+                handleClosePopUp();
+            } catch (error) {
+                console.log("Error updating order status", error);
+            }
+        }else{
+            toast.current.show({
+                severity: 'error',
+                summary: 'Thông báo',
+                detail: errors.email ? errors.email : errors.cancelReason,
+                life: 3000,
+                });
+        }
     };
+    
     
     const handleCancelChange = (e) => {
         setCancelReason(e.target.value);
@@ -94,11 +200,15 @@ function Order() {
 
     const popUp = () => {
         return (
-            <div className="fixed top-0 w-screen h-screen bg-[rgba(0,0,0,0.5)] z-50 px-64 drop-shadow-xl">
-                <div className="relative top-28 left-64 bg-white opacity-100 h-80 rounded-xl p-4 w-96">
+            <div className="fixed top-0 left-0 w-screen h-screen bg-[rgba(0,0,0,0.5)] z-50 px-80 drop-shadow-xl">
+                <div className="relative top-28 left-64 bg-white opacity-100 h-82 rounded-xl p-4 w-96">
                     <button className="absolute right-6 top-4" onClick={handleClosePopUp}>X</button>
                     <div className="flex flex-col items-center justify-center">
-                        <h2 className="text-xl font-semibold">Lý do hủy đơn</h2>
+                        <h2 className="text-xl font-semibold">Lý do hủy đơn hàng #{orderId}</h2>
+                        <FloatLabel className='mt-8 w-full'>
+                            <InputText className='border w-full p-2' id="email" value={email} onChange={(e) => setEmail(e.target.value)}/>
+                            <label htmlFor="email">Email</label>
+                        </FloatLabel>
                         <textarea
                             value={cancelReason}
                             onChange={handleCancelChange}
@@ -107,7 +217,7 @@ function Order() {
                         />
                         <button
                             onClick={handleCancelSubmit}
-                            className="mt-4 px-6 py-2 bg-red-600 text-white rounded-md"
+                            className="mt-4 px-6 py-2 bg-red-600 text-white rounded-md hover:opacity-50"
                         >
                             Gửi lý do hủy
                         </button>
@@ -119,27 +229,26 @@ function Order() {
     
 
     const renderContent = () => {
-        switch (selectedStatus) {
-            case "Tất cả":
-                return (
-                    <DataScroller value={orders} itemTemplate={itemTemplate} rows={5} inline scrollHeight="500px"/>
-                );
-            case "Đã xác nhận":
-                return <div><h3 className="text-lg font-semibold">Đơn hàng đã xác nhận</h3></div>;
-            case "Đang chuyển hàng":
-                return <div><h3 className="text-lg font-semibold">Đơn hàng đang chuyển hàng</h3></div>;
-            case "Đã hủy":
-                return <div><h3 className="text-lg font-semibold">Đơn hàng đã hủy</h3></div>;
-            case "Thành công":
-                return <div><h3 className="text-lg font-semibold">Đơn hàng thành công</h3></div>;
-            default:
-                return null;
+        let filteredOrders = [];
+    
+        if (selectedStatus === "Tất cả") {
+            filteredOrders = orders;
+        } else {
+            console.log(selectedStatus);
+            filteredOrders = orders.filter(order => tags[order.status] === selectedStatus);
         }
+    
+        return (
+            <DataScroller value={filteredOrders} itemTemplate={itemTemplate} rows={5} inline scrollHeight="500px"/>
+        );
     };
+    
 
     return (
-        <div className="bg-white shadow-lg rounded-lg px-6 m-4 min-h-screen">
-            <div className="my-8 flex justify-around">
+        <div className="bg-white shadow-lg rounded-lg px-64 m-4 min-h-screen">
+            <Toast ref={toast} />
+
+            <div className="my-8 font-semibold flex justify-around">
                 <button onClick={() => handleButtonClick("Tất cả")} className={`border ${getButtonClass("Tất cả")} px-6 py-4 rounded-md text-sm`}>
                     Tất cả
                 </button>
@@ -155,12 +264,15 @@ function Order() {
                 <button onClick={() => handleButtonClick("Thành công")} className={`border ${getButtonClass("Thành công")} px-6 py-4 rounded-md text-sm`}>
                     Thành công
                 </button>
+                <button onClick={() => handleButtonClick("Chờ xác nhận")} className={`border ${getButtonClass("Chờ xác nhận")} px-6 py-4 rounded-md text-sm`}>
+                    Chờ xác nhận
+                </button>
             </div>
 
             <div className="mt-6 min-h-96 border border-second rounded-xl p-10">
                 {renderContent()}
             </div>
-                {showPopUp && popUp()}
+            {showPopUp && popUp()}
         </div>
     );
 }
