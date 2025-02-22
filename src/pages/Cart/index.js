@@ -230,7 +230,7 @@ function Cart() {
             const orderData = {
                 userId: JSON.parse(sessionStorage.getItem('user')),
                 totalAmount: sessionStorage.getItem('totalAmount'),
-                discountAmount: discountPrice(totalPrice(cart), coupon) || "0",
+                discountAmount: Intl.NumberFormat('vi-VN').format(discountPrice(totalPrice(cart), coupon)) + "đ" || "0đ",
                 finalAmount: Intl.NumberFormat('vi-VN').format(queryParams.get('vnp_Amount')/100) + 'đ',
                 status: 'warning',
                 paymentMethod: "VNPay",
