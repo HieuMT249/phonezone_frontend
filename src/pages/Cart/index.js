@@ -230,7 +230,7 @@ function Cart() {
             const orderData = {
                 userId: JSON.parse(sessionStorage.getItem('user')),
                 totalAmount: sessionStorage.getItem('totalAmount'),
-                discountAmount: JSON.parse(sessionStorage.getItem('coupon')),
+                discountAmount: discountPrice(totalPrice(cart), coupon) || "0",
                 finalAmount: Intl.NumberFormat('vi-VN').format(queryParams.get('vnp_Amount')/100) + 'đ',
                 status: 'warning',
                 paymentMethod: "VNPay",
@@ -266,7 +266,10 @@ function Cart() {
         
         if(selectedPayment?.code === "vnpay"){
             handlePayment();
-        }else{
+        }else if(selectedPayment?.code === "CH"){
+            handlePaymentAtStore();
+        }
+        else{
             if (currentStep < steps.length - 1) {
                 setCurrentStep(currentStep + 1);
             }
@@ -473,6 +476,62 @@ function Cart() {
                 life: 3000,
             });
         }
+    };
+
+    const handlePaymentAtStore = async () => {
+        try {
+            sessionStorage.setItem('user', JSON.stringify(user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"]));
+            sessionStorage.setItem('totalAmount', Intl.NumberFormat('vi-VN').format(totalPrice(cart)) + 'đ');
+            sessionStorage.setItem('coupon', JSON.stringify(coupon ? coupon : ""));
+            sessionStorage.setItem('cart', JSON.stringify(cart));
+            sessionStorage.setItem('color', JSON.stringify(color));
+
+            if (!localStorage.getItem('orderSaved')) {
+                const orderData = {
+                    userId: user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
+                    totalAmount: Intl.NumberFormat('vi-VN').format(totalPrice(cart)) + 'đ',
+                    discountAmount: Intl.NumberFormat('vi-VN').format(discountPrice(totalPrice(cart), coupon)) + "đ" || "0đ",
+                    finalAmount: Intl.NumberFormat('vi-VN').format(finalPrice(totalPrice(cart), coupon)) + 'đ',
+                    status: 'warning',
+                    paymentMethod: "Cửa hàng",
+                    color: color,
+                    createDate: formatDate(new Date()),
+                };
+    
+                saveOrder(orderData);
+                localStorage.setItem('orderSaved', 'true');
+                setCurrentStep(3);
+    
+                axios.delete(`https://localhost:7274/api/v1/CartItems/user/${JSON.parse(sessionStorage.getItem('user'))}`)
+                .then((response) => {
+                    console.log('Cart cleared successfully:', response);
+                })
+                .catch((error) => {
+                    console.error('Error clearing cart:', error);
+                });
+    
+            }
+
+        } catch (error) {
+            console.log("Lỗi khi tạo URL thanh toán VNPay: ", error);
+            toast.current.show({
+                severity: 'error',
+                summary: 'Thông báo',
+                detail: 'Không thể tạo URL thanh toán. Vui lòng thử lại sau.',
+                life: 3000,
+            });
+        }
+    };
+
+    const formatDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        
+        return `${year}${month}${day}${hours}${minutes}${seconds}`;
     };
     
     return (

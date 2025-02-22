@@ -2,12 +2,45 @@ import { useNavigate } from "react-router-dom";
 import { FaHeart, FaRegHeart  } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import { Tag } from 'primereact/tag';
+import CartPopUp from "../CartPopUp";
 
-function Card({image, productName, name, newPrice, oldPrice, user, toggleCartPopup, discount}) {
+function Card({image, productName, name, newPrice, oldPrice, discount}) {
     const navigate = useNavigate();
     const [isHover, setIsHover] = useState(false);
     const [wishlist, setWishlist] = useState(false);
+    const [user, setUser] = useState();
+    const [isCartVisible, setIsCartVisible] = useState(false);
+
+
+    const parseJwt = (token) => {
+        try {
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const decodedPayload = atob(base64);
+  
+          return JSON.parse(decodedPayload);
+        } catch (e) {
+          return null;
+        }
+    };
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            const decodedToken = parseJwt(token);
+            if (decodedToken) {
+                const expirationTime = decodedToken.exp * 1000;
+                const currentTime = Date.now();
     
+                if (expirationTime > currentTime) {
+                setUser(decodedToken);
+                } else {
+                localStorage.removeItem("token");
+                navigate("/");
+                }
+            }
+        }
+    }, [navigate]); 
 
     const handleClick = () => {
         localStorage.setItem("name", name);
@@ -16,7 +49,7 @@ function Card({image, productName, name, newPrice, oldPrice, user, toggleCartPop
 
     const handleWishlist = () => {
         if (!user) {
-            toggleCartPopup();
+            toggleCartPopup()
         } else {
             setWishlist(!wishlist);
     
@@ -26,10 +59,17 @@ function Card({image, productName, name, newPrice, oldPrice, user, toggleCartPop
             // };
         }
     }
+
+    const toggleCartPopup = () => {
+        setIsCartVisible(!isCartVisible);
+    };
      
     
     return ( 
         <div className="border border-second min-h-96 bg-white rounded-2xl p-6 ml-6 hover:cursor-pointer drop-shadow-xl">
+            {
+                isCartVisible && <div><CartPopUp onClose={toggleCartPopup}/></div> 
+            }
             <div onClick={handleClick} className="">
                 <img src={image} alt={productName} className="w-40 shadow-2 mx-auto" />
             </div>
