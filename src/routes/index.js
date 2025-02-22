@@ -18,7 +18,6 @@ const publicRoutes = [
     { path: '/dienthoai', component: Product },
     { path: '/dienthoai/*', component: ProductList },
     { path: '/dienthoai/details/*', component: ProductDetail },
-    { path: '/wishlist', component:  WishList},
 
 ];
 
@@ -26,6 +25,7 @@ const publicRoutes = [
 const privateRoutes = [
     { path: '/order', component:  Order},
     { path: '/cart', component:  Cart},
+    { path: '/wishlist', component:  WishList},
 ];
 
 export { publicRoutes, privateRoutes };
