@@ -8,18 +8,9 @@ import CarouselDisplay from "../../components/CarouselDisplay";
 import CarouselProduct from "../../components/CarouselProduct";
 
 function Home() {
-    
-    const [isCartVisible, setIsCartVisible] = useState(false);
     const [user, setUser] = useState();
     const navigate = useNavigate();
-
-    const toggleCartPopup = () => { 
-        if(user){
-            
-        }else {
-            setIsCartVisible(!isCartVisible);
-        }
-    };
+    const [showPopUp, setShowPopUp] = useState(false);
 
     const parseJwt = (token) => {
         try {
@@ -102,10 +93,15 @@ function Home() {
             alt: "all",
             uri: "/dienthoai"
         },
-    ]
+    ];
+
+    const closePopUp = () => {
+        setShowPopUp(false);
+    };
 
     return ( 
         <div className="min-h-screen">
+            {showPopUp && <CartPopUp onClose={closePopUp} />}
             <div className="relative flex justify-between h-[36rem] bg-gradient-15">
                 <Search/>
                 <div className="pt-24 pl-28 mt-20 text-center">
@@ -127,13 +123,10 @@ function Home() {
                     
                 </div>
                 <div>
-                    <CarouselDisplay user={user} toggleCartPopup={toggleCartPopup}/>  
-                    {
-                        (isCartVisible && !user ) && <CartPopUp onClose={toggleCartPopup} />
-                    }
+                    <CarouselDisplay user={user} setShowPopUp={setShowPopUp}/>  
                 </div>
                 <div>
-                    <CarouselProduct/>
+                    <CarouselProduct setShowPopUp={setShowPopUp}/>
                 </div>
             </div>
         </div>

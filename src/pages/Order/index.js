@@ -239,7 +239,7 @@ function Order() {
         }
     
         return (
-            <DataScroller value={filteredOrders} itemTemplate={itemTemplate} rows={5} inline scrollHeight="500px"/>
+            <DataScroller value={filteredOrders} itemTemplate={itemTemplate} rows={20} inline scrollHeight="500px"/>
         );
     };
     

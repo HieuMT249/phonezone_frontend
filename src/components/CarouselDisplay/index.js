@@ -2,7 +2,7 @@ import { Carousel } from 'primereact/carousel';
 import { useState } from 'react';
 import Card from '../Card';
 
-function CarouselDisplay({user, toggleCartPopup}) {
+function CarouselDisplay({user, setShowPopUp}) {
     const [productsShock, setProductsShock] = useState([
         {
             "id": 2122,
@@ -334,9 +334,10 @@ function CarouselDisplay({user, toggleCartPopup}) {
         }
     ];
 
+
     const productTemplate = (product) => {
         return (
-            <Card image={product.image} productName={product.productName} name={product.id} newPrice={product.newPrice} oldPrice={product.oldPrice} user={user} toggleCartPopup={toggleCartPopup} discount={product.discount}/>
+            <Card image={product.image} productName={product.productName} name={product.id} newPrice={product.newPrice} oldPrice={product.oldPrice} user={user} discount={product.discount} setShowPopUp={setShowPopUp}/>
         );
     };
 

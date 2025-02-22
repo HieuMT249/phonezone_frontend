@@ -5,7 +5,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import Card from "../Card";
 
 
-function CarouselProduct() {
+function CarouselProduct({setShowPopUp}) {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -55,7 +55,7 @@ function CarouselProduct() {
                     <>
                         <div className="w-full border border-second rounded-xl bg-gradient-15 py-10 px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
                             {products.slice(0, displayCount).map((product, index) => (
-                                <Card key={index} image={product.image} productName={product.productName} name={product.id} newPrice={product.newPrice} oldPrice={product.oldPrice} />
+                                <Card key={index} setShowPopUp={setShowPopUp} image={product.image} productName={product.productName} name={product.id} newPrice={product.newPrice} oldPrice={product.oldPrice} />
                             ))}
                         </div>
                         {displayCount < products.length && (

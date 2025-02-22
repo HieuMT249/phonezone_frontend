@@ -230,13 +230,15 @@ function Cart() {
             const orderData = {
                 userId: JSON.parse(sessionStorage.getItem('user')),
                 totalAmount: sessionStorage.getItem('totalAmount'),
-                discountAmount: Intl.NumberFormat('vi-VN').format(discountPrice(totalPrice(cart), coupon)) + "đ" || "0đ",
+                discountAmount: JSON.parse(sessionStorage.getItem('coupon')) ? Intl.NumberFormat('vi-VN').format(discountPrice(totalPrice(JSON.parse(sessionStorage.getItem('cart'))), JSON.parse(sessionStorage.getItem('coupon')))) + "đ" : "0đ",
                 finalAmount: Intl.NumberFormat('vi-VN').format(queryParams.get('vnp_Amount')/100) + 'đ',
                 status: 'warning',
                 paymentMethod: "VNPay",
                 color: JSON.parse(sessionStorage.getItem('color')),
-                createDate: queryParams.get('vnp_CreateDate'),
+                createDate: queryParams.get('vnp_PayDate'),
             };
+
+
 
             saveOrder(orderData);
             localStorage.setItem('orderSaved', 'true');
@@ -435,6 +437,8 @@ function Cart() {
             sessionStorage.removeItem('coupon');
             sessionStorage.removeItem('color');
 
+            localStorage.removeItem('orderSaved');
+            
             const countdown = setInterval(() => {
                 setTimer((prevTimer) => prevTimer - 1);
             }, 1000);
@@ -443,7 +447,6 @@ function Cart() {
         }
 
         if (timer === 0) {
-            localStorage.removeItem('orderSaved');
             navigate("/");
         }
     }, [currentStep, timer, navigate]);

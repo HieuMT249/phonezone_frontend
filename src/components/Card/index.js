@@ -3,13 +3,13 @@ import { FaHeart, FaRegHeart  } from "react-icons/fa6";
 import { useEffect, useState } from "react";
 import { Tag } from 'primereact/tag';
 import CartPopUp from "../CartPopUp";
+import axios from "axios";
 
-function Card({image, productName, name, newPrice, oldPrice, discount}) {
+function Card({image, productName, name, newPrice, oldPrice, discount, setShowPopUp }) {
     const navigate = useNavigate();
     const [isHover, setIsHover] = useState(false);
     const [wishlist, setWishlist] = useState(false);
     const [user, setUser] = useState();
-    const [isCartVisible, setIsCartVisible] = useState(false);
 
 
     const parseJwt = (token) => {
@@ -47,29 +47,25 @@ function Card({image, productName, name, newPrice, oldPrice, discount}) {
         navigate(`/dienthoai/details/${productName}`);
     }
 
-    const handleWishlist = () => {
+    const handleWishlist = async () => {
         if (!user) {
-            toggleCartPopup()
+            setShowPopUp(true); 
         } else {
             setWishlist(!wishlist);
-    
-            // const wishListItem = {
-            //     productId: productId,
-            //     wishListId: user.wishListId
-            // };
+
+            const wishListItem = {
+                productId: name
+            }
+
+            const userId = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+
+            await axios.post(`https://localhost:7274/api/v1/WishListItems/${userId}`, wishListItem); 
+               
         }
     }
 
-    const toggleCartPopup = () => {
-        setIsCartVisible(!isCartVisible);
-    };
-     
-    
     return ( 
-        <div className="border border-second min-h-96 bg-white rounded-2xl p-6 ml-6 hover:cursor-pointer drop-shadow-xl">
-            {
-                isCartVisible && <div><CartPopUp onClose={toggleCartPopup}/></div> 
-            }
+        <div className="relative border border-second min-h-96 bg-white rounded-2xl p-6 ml-6 hover:cursor-pointer drop-shadow-xl">
             <div onClick={handleClick} className="">
                 <img src={image} alt={productName} className="w-40 shadow-2 mx-auto" />
             </div>
