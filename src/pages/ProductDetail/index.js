@@ -18,22 +18,51 @@ function ProductDetail() {
     const [productDetail, setProductDetail] = useState(null);
     const [images, setImages] = useState(null);
     const [isExpand, setIsExpand] = useState(false);
+    const [isDetailsVisible, setIsDetailsVisible] = useState(false);
+    
+    
     const { setCartCount } = useCart();
-
     const navigate = useNavigate();
     const location = useLocation();
     const toast = useRef(null);
 
     const specs = [
-        { label: 'Kích thước màn hình', value: productDetail.screen },
-        { label: 'Công nghệ màn hình', value: productDetail.screenTechnology },
-        { label: 'Camera sau', value: productDetail.rearCamera },
-        { label: 'Camera trước', value: productDetail.frontCamera },
-        { label: 'Chipset', value: productDetail.chipset },
-        { label: 'Công nghệ NFC', value: productDetail.nfc ? "Có" : "Không" },
-        { label: 'Dung lượng RAM', value: productDetail.ram },
-        { label: 'Bộ nhớ trong', value: productDetail.internalMemory },
-        { label: 'Pin', value: productDetail.batteryCapacity },
+        { label: 'Kích thước màn hình', value: productDetail?.screenSize },
+        { label: 'Công nghệ màn hình', value: productDetail?.screenTechnology },
+        { label: 'Dung lượng Pin', value: productDetail?.batteryCapacity },
+        { label: 'Bộ nhớ trong', value: productDetail?.internalMemory },
+        { label: 'Tính năng màn hình', value: productDetail?.screenFeatures },
+        { label: 'Độ phân giải', value: productDetail?.screenResolution },
+        { label: 'Chip', value: productDetail?.chip },
+        { label: 'Công nghệ NFC', value: productDetail?.nfc},
+        { label: 'CPU', value: productDetail?.cpu },
+        { label: 'Dung lượng RAM', value: productDetail?.ram },
+        { label: 'Cảm biến', value: productDetail?.sensor },
+        { label: 'sim', value: productDetail?.sim },
+        { label: 'Camera sau', value: productDetail?.rearCamera },
+        { label: 'Camera trước', value: productDetail?.frontCamera },
+        { label: 'Pin', value: productDetail?.batteryCapacity },
+        { label: 'Tính năng đặc biệt', value: productDetail?.specialFeatures },
+        { label: 'Vân tay', value: productDetail?.fingerprintSensor },
+        { label: 'Công nghệ sạc', value: productDetail?.chargingTechnology },
+        { label: 'GPS', value: productDetail?.gps },
+        { label: 'Bluetooth', value: productDetail?.bluetooth },
+        { label: 'Wi-fi', value: productDetail?.wifi },
+        { label: 'Hỗ trợ mạng', value: productDetail?.networkSupport },
+        { label: 'Hỗ trợ sạc tối đa', value: productDetail?.chargingSupport },
+        { label: 'GPU', value: productDetail?.gpu },
+        { label: 'Tính năng camera', value: productDetail?.cameraFeatures },
+        { label: 'Kháng nước, bụi', value: productDetail?.waterResistant },
+        { label: 'Bảo hành', value: productDetail?.guarantee },
+        { label: 'Hãng', value: productDetail?.company },
+        { label: 'Thương hiệu', value: productDetail?.country },
+        { label: 'Pin và nguồn', value: productDetail?.battery },
+        { label: 'Sạc và kết nối', value: productDetail?.chargingConnectivity },
+        { label: 'Video', value: productDetail?.video },
+        { label: 'Trọng lượng', value: productDetail?.weight },
+        { label: 'Màu sắc', value: productDetail?.colour },
+        { label: 'Camera', value: productDetail?.camera },
+        { label: 'Màn hình', value: productDetail?.screen },
     ];
 
     const parseJwt = (token) => {
@@ -72,6 +101,10 @@ function ProductDetail() {
     const toggleExpand = () => {
         setIsExpand(!isExpand);
     }
+
+    const toggleDetails = () => {
+        setIsDetailsVisible(!isDetailsVisible);
+    };
 
     const responsiveOptions = [
         {
@@ -281,7 +314,7 @@ function ProductDetail() {
                     </div>
                 }
             </div>
-            <div className='relative flex justify-around text-3xl border border-2 border-transparent border-t-gray-200 pb-20 pt-10 mx-20'>
+            <div className='relative flex justify-around text-3xl border border-2 border-transparent border-t-gray-200 pb-20 pt-10 mx-10'>
                 {
                     product?.productDescription && productDetail?.outstandingFeatures ? (
                         <>
@@ -323,32 +356,89 @@ function ProductDetail() {
                                     ))
                                 }
                             </div>
-                                <div className="absolute bottom-0 -left-[10rem] flex justify-center items-center text-center my-6 w-full mx-auto">
+                                <div className="absolute bottom-0 -left-[16rem] flex justify-center items-center text-center my-6 w-full mx-auto">
                                     {isExpand ? 
                                         <button onClick={toggleExpand} className="flex items-center px-4 p-1 text-lg border border-second hover:border-primary hover:text-primary rounded ">Thu gọn<i className="ml-1"><IoIosArrowUp /></i></button>
                                         :
                                         <button onClick={toggleExpand} className="flex items-center px-4 p-1 text-lg border border-second hover:border-primary hover:text-primary rounded ">Xem thêm<i className="ml-1"><IoIosArrowDown /></i></button>
                                     }
                                 </div>
-                            <div className='border bg-white drop-shadow-xl w-1/3 rounded-xl py-4 px-6 text-2xl max-h-[30rem] overflow-hidden'>
+                            <div className='border bg-white drop-shadow-xl w-1/3 rounded-xl py-4 px-4 text-2xl max-h-[30rem] overflow-hidden'>
                                 <p className='font-bold text-center mb-4'>Thông số kỹ thuật</p>
-                                <table className="w-full table-auto text-lg border">
-                                    <thead className='border'>
-                                        <tr className='text-center border'>
-                                            <th className="font-semibold border p-2">Thông số</th>
-                                            <th className="font-semibold border p-2">Giá trị</th>
+                                <table className="table-auto text-lg bg-white border drop-shadow-xl">
+                                    <thead>
+                                        <tr className='text-center w-full'>
+                                            <th className="font-semibold p-2 border-r">Thông số</th>
+                                            <th className="font-semibold p-2">Giá trị</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {specs.map((spec, index) => (
-                                            <tr key={index} className="border">
-                                                <td className="p-2 border">{spec.label}</td>
-                                                <td className="p-2 border">{spec.value}</td>
-                                            </tr>
-                                        ))}
+                                        {specs
+                                            .filter(spec => spec.value)
+                                            .map((spec, index) => (
+                                                <tr key={index} className="border-t">
+                                                    <td className="p-2 text-center border-r">{spec.label}</td>
+                                                    <td className="p-4 max-w-[20rem]">{spec.value}</td>
+                                                </tr>
+                                            ))
+                                        }
                                     </tbody>
                                 </table>
+                                <div className='absolute bottom-0 left-0 w-full bg-white'>
+                                    <button 
+                                        onClick={toggleDetails} 
+                                        className="relative left-[8rem] text-center my-6 mx-auto text-lg border border-second px-4 p-1 rounded hover:text-primary hover:border-primary"
+                                    >
+                                        {isDetailsVisible ? "Thu gọn" : "Xem cấu hình chi tiết"}
+                                    </button>
+                                </div>
                             </div>
+
+                            {/* Modal hiển thị thông số kỹ thuật chi tiết */}
+                            {isDetailsVisible && (
+                                <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
+                                    <div className="bg-white rounded-lg w-3/4 p-6 overflow-auto max-h-[80vh]">
+                                        <div className="flex justify-between items-start">
+                                            <p className='font-bold text-center mb-4'>Thông số kỹ thuật</p>
+                                            <button
+                                                onClick={toggleDetails}
+                                                className="text-gray-500 text-3xl"
+                                            >
+                                                &times;
+                                            </button>
+                                        </div>
+                                        <div className="mt-4">
+                                            <table className="w-full table-auto text-lg border">
+                                                <thead className='border'>
+                                                    <tr className='text-center border'>
+                                                        <th className="font-semibold border p-2">Thông số</th>
+                                                        <th className="font-semibold border p-2">Giá trị</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                {specs
+                                                    .filter(spec => spec.value)
+                                                    .map((spec, index) => (
+                                                        <tr key={index} className="border">
+                                                            <td className="p-2 border">{spec.label}</td>
+                                                            <td className="p-4 border">{spec.value}</td>
+                                                        </tr>
+                                                    ))
+                                                }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div className="mt-4 text-right">
+                                            <button
+                                                onClick={toggleDetails}
+                                                className="px-6 py-2 text-lg border border-primary rounded hover:bg-red-600 hover:text-white hover:border-red-600"
+                                            >
+                                                Đóng
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </>
                     ) : (
                         <>

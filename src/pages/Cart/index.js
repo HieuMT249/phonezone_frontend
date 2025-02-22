@@ -234,7 +234,8 @@ function Cart() {
                 finalAmount: Intl.NumberFormat('vi-VN').format(queryParams.get('vnp_Amount')/100) + 'đ',
                 status: 'warning',
                 paymentMethod: "VNPay",
-                color: JSON.parse(sessionStorage.getItem('color'))
+                color: JSON.parse(sessionStorage.getItem('color')),
+                createDate: queryParams.get('vnp_CreateDate'),
             };
 
             saveOrder(orderData);

@@ -19,8 +19,14 @@ function Card({image, productName, name, newPrice, oldPrice, user, toggleCartPop
             toggleCartPopup();
         } else {
             setWishlist(!wishlist);
+    
+            // const wishListItem = {
+            //     productId: productId,
+            //     wishListId: user.wishListId
+            // };
         }
-    }   
+    }
+     
     
     return ( 
         <div className="border border-second min-h-96 bg-white rounded-2xl p-6 ml-6 hover:cursor-pointer drop-shadow-xl">
