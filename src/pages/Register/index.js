@@ -112,10 +112,7 @@ function Register() {
     };
 
     return (
-        <div className="flex justify-between min-h-screen bg-gradient-15 p-40 pt-20">
-            {/* Skeleton */}
-            {loading && <Skeleton width="100%" height="100%"></Skeleton>}
-            
+        <div className="flex justify-between min-h-screen bg-gradient-15 p-40 pt-20">            
             {/* Left Section - Image */}
             <div className="flex items-center pt-10">
                 <img className="max-w-full h-auto" src={images.login} alt="Register Devices" />

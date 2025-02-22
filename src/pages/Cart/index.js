@@ -195,7 +195,7 @@ function Cart() {
             }));
     
             await Promise.all(orderDetails.map(detail => axios.post('https://localhost:7274/api/v1/OrderDetails', detail)));
-    
+
             if (coupon) {
                 const couponDetails = {
                     orderId: orderId,
@@ -410,7 +410,7 @@ function Cart() {
                     });
             }
         }
-        return totalprice;
+        return 0;
     }
     
     const finalPrice = (totalprice, coupon) => {
@@ -438,7 +438,7 @@ function Cart() {
             sessionStorage.removeItem('color');
 
             localStorage.removeItem('orderSaved');
-            
+
             const countdown = setInterval(() => {
                 setTimer((prevTimer) => prevTimer - 1);
             }, 1000);

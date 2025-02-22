@@ -39,12 +39,16 @@ function Header({ toggleCartPopup }) {
             {
               label: "Sản phẩm yêu thích",
               icon: "pi pi-heart",
+              command: () => {
+                navigate("/wishlist");
+              }
             },
             {
               label: 'Logout',
               icon: 'pi pi-sign-out',
               command: () => {
                   localStorage.removeItem("token");
+                  navigate("/");
                   window.location.reload();
               }
           }

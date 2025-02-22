@@ -57,7 +57,10 @@ function Order() {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const response = await axios.get(`https://localhost:7274/api/v1/Orders`);
+                const userId = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
+                
+                const response = await axios.get(`https://localhost:7274/api/v1/Orders/user/${userId}`);
+                console.log("Order: ",response.data.$values);
                 const ordersData = response.data.$values;
     
                 const updatedOrders = await Promise.all(ordersData.map(async (order) => {
@@ -82,7 +85,7 @@ function Order() {
             }
         };
         fetchOrders();
-    }, []);
+    }, [user]);
     
     const tags = {
         success : "Giao hàng thành công",

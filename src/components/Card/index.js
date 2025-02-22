@@ -8,8 +8,8 @@ import axios from "axios";
 function Card({image, productName, name, newPrice, oldPrice, discount, setShowPopUp }) {
     const navigate = useNavigate();
     const [isHover, setIsHover] = useState(false);
-    const [wishlist, setWishlist] = useState(false);
     const [user, setUser] = useState();
+    const savedItems = JSON.parse(localStorage.getItem('wishlist')) || [];
 
 
     const parseJwt = (token) => {
@@ -41,28 +41,46 @@ function Card({image, productName, name, newPrice, oldPrice, discount, setShowPo
             }
         }
     }, [navigate]); 
-
+    
     const handleClick = () => {
         localStorage.setItem("name", name);
         navigate(`/dienthoai/details/${productName}`);
     }
 
-    const handleWishlist = async () => {
+    const handleWishlist = async (id) => {
         if (!user) {
             setShowPopUp(true); 
         } else {
-            setWishlist(!wishlist);
-
-            const wishListItem = {
-                productId: name
-            }
-
+            const isProductInWishlist = savedItems.some(item => item.Id === id);
             const userId = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"];
-
-            await axios.post(`https://localhost:7274/api/v1/WishListItems/${userId}`, wishListItem); 
-               
+        
+            if (!isProductInWishlist) {
+                try {
+                    await axios.post(`https://localhost:7274/api/v1/WishLists/`, {
+                        UserId: userId,
+                        Id: id
+                    });
+                    const updatedSavedItems = [...savedItems, {Id: id}];
+                    localStorage.setItem("wishlist", JSON.stringify(updatedSavedItems));
+                } catch (error) {
+                    console.error("Error adding to wishlist:", error);
+                }
+            } else {
+                try {
+                    await axios.delete(`https://localhost:7274/api/v1/WishListItems/${userId}/${id}`);
+                    
+                    const updatedSavedItems = savedItems.filter(item => item.Id !== id);
+                    localStorage.setItem("wishlist", JSON.stringify(updatedSavedItems));
+                    window.location.reload()
+                } catch (error) {
+                    console.error("Error removing from wishlist:", error);
+                }
+            }
         }
-    }
+    };    
+    
+
+    const isProductInWishlist = savedItems.some(item => item.Id === name);
 
     return ( 
         <div className="relative border border-second min-h-96 bg-white rounded-2xl p-6 ml-6 hover:cursor-pointer drop-shadow-xl">
@@ -87,9 +105,9 @@ function Card({image, productName, name, newPrice, oldPrice, discount, setShowPo
                     }
                     <div className="flex items-center">
                         <span className="text-xs mr-2 text-gray-400">Yêu thích</span>
-                        <button className="text-primary " onClick={handleWishlist} onMouseEnter={()=>setIsHover(true)} onMouseLeave={()=>setIsHover(false)}>
+                        <button className="text-primary " onClick={() => handleWishlist(name)} onMouseEnter={()=>setIsHover(true)} onMouseLeave={()=>setIsHover(false)}>
                             {
-                                (isHover || wishlist) ? <FaHeart /> : <FaRegHeart/>
+                                (isHover || isProductInWishlist) ? <FaHeart /> : <FaRegHeart/>
                             }
                         </button>
                     </div>

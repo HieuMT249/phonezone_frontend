@@ -60,7 +60,7 @@ function Product() {
         const fetchProducts = async () => {
             try {
                 const response= await axios.get(`https://localhost:7274/api/v1/Products`);
-                const shuffledProducts = shuffleArray(response.data); 
+                const shuffledProducts = shuffleArray(response.data.$values); 
                 setProducts(shuffledProducts);
                 setAllProduct(shuffledProducts);
                 setLoading(false);
@@ -98,7 +98,7 @@ function Product() {
                         <Toast ref={toast} />
                         <MultiSelect value={selectedPrice} onChange={(e) => setSelectedPrice(e.value)} options={prices} optionLabel="name" display="chip" 
                             placeholder="Chọn khoảng giá tiền" maxSelectedLabels={3} className="w-96 border border-priamry border-2" />
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 mt-10">
                             {products.slice(0, displayCount).map((product, index) => (
                                 <Card key={index} image={product.image} productName={product.productName} name={product.id} newPrice={product.newPrice} oldPrice={product.oldPrice} />
                             ))}

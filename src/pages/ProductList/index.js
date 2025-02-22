@@ -33,8 +33,8 @@ function ProductList() {
                     setProducts(search);
                 }else{
                     const response= await axios.get(`https://localhost:7274/api/v1/Products/dienthoai/${brand}`);
-                    setProducts(response.data);
-                    setAllProduct(response.data);
+                    setProducts(response.data.$values);
+                    setAllProduct(response.data.$values);
                     setLoading(false);
                 }
             } catch (err) {
@@ -46,15 +46,16 @@ function ProductList() {
         fetchRandomProducts();
     }, [brand, search]);
 
+
     useEffect(() => {
         const filterProductsByPrice = () => {
             if (Array.isArray(selectedPrice) && selectedPrice.length > 0) {
                 const minPrice = Math.min(...selectedPrice.map(price => price.min));
                 const maxPrice = Math.max(...selectedPrice.map(price => price.max));
-
+                console.log(maxPrice);
                 const filtered = products.filter((product) => {
                     return selectedPrice.some((priceRange) => {
-                        const price = product.newPrice.replace('đ', '').replace(/\./g, '');
+                        const price = product.newPrice.replace('đ', '').replace(/\./g, '').replace(/\,/g, '');
                         const priceNumber = parseFloat(price);
                         
                         return priceNumber >= minPrice && priceNumber <= maxPrice;
@@ -77,7 +78,7 @@ function ProductList() {
         };
     
         filterProductsByPrice();
-    }, [selectedPrice, allProduct, products]);
+    }, [selectedPrice, allProduct]);
     
 
     return ( 
@@ -92,7 +93,7 @@ function ProductList() {
                     <>
                         <Toast ref={toast} />
                         <MultiSelect value={selectedPrice} onChange={(e) => setSelectedPrice(e.value)} options={prices} optionLabel="name" display="chip" 
-                            placeholder="Chọn khoảng giá tiền" maxSelectedLabels={3} className="w-96 border border-priamry border-2" />
+                            placeholder="Chọn khoảng giá tiền" maxSelectedLabels={3} className="w-96 border border-priamry border-2 mb-10" />
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-12">
                             {products.map((product, index) => (
                                 <Card key={index} image={product.image} productName={product.productName} name={product.id} newPrice={product.newPrice} oldPrice={product.oldPrice} />

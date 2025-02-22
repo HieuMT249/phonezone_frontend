@@ -7,6 +7,7 @@ import ProductDetail from "../pages/ProductDetail";
 import Product from "../pages/Product";
 import Cart from "../pages/Cart";
 import Order from "../pages/Order";
+import WishList from "../pages/WishList";
 
 
 //dùng cho các trang không cần đăng nhập
@@ -17,6 +18,8 @@ const publicRoutes = [
     { path: '/dienthoai', component: Product },
     { path: '/dienthoai/*', component: ProductList },
     { path: '/dienthoai/details/*', component: ProductDetail },
+    { path: '/wishlist', component:  WishList},
+
 ];
 
 //dùng cho các trang cần đăng nhập mới sử dụng được
